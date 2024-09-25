@@ -38,7 +38,7 @@ function OPTIONDELTA(price, strike, volatility, interest, dividend, days, option
 function OPTIONGAMMA(price, strike, volatility, interest, dividend, days) {
   var d1 = D1_(price, strike, volatility, interest, dividend, days);
   var time = days/365;
-  var eqt = Math.exp(-dividend * time);
+  var eqt = Math.exp(-interest * time);
   var asqrtT = volatility * Math.sqrt(time);
   
   return Math.exp(-1 * Math.pow(d1, 2)/2)/Math.sqrt(2*Math.PI)*eqt/(price*asqrtT);  
@@ -63,14 +63,15 @@ function OPTIONTHETA(price, strike, volatility, interest, dividend, days, option
   var time = days/365;
   var eqt = Math.exp(-dividend * time);
   var xert = Math.exp(-interest * time) * strike;
-  var nd1 = NORMDIST_(D1_(price, strike, volatility, interest, dividend, days));
   
   if (optiontype == "Put")
   {
-    return (-(price*Math.exp(-1*Math.pow(d1,2)/2)/Math.sqrt(2*Math.PI)*volatility*eqt/(2*Math.sqrt(time)))+(interest*xert*nd1)-(dividend*price*nd1*eqt))/365;  
+    var nNegD2 = NORMDIST_(-D2_(price, strike, volatility, interest, dividend, days));
+    return (-(price*Math.exp(-1*Math.pow(d1,2)/2)/Math.sqrt(2*Math.PI)*volatility*eqt/(2*Math.sqrt(time)))+(interest*xert*nNegD2)-(dividend*price*nNegD2*eqt))/365;
   }
-  
-  return (-(price*Math.exp(-1*Math.pow(d1,2)/2)/Math.sqrt(2*Math.PI)*volatility*eqt/(2*Math.sqrt(time)))-(interest*xert*nd1)+(dividend*price*nd1*eqt))/365;
+
+  var nD2 = NORMDIST_(D2_(price, strike, volatility, interest, dividend, days));
+  return (-(price*Math.exp(-1*Math.pow(d1,2)/2)/Math.sqrt(2*Math.PI)*volatility*eqt/(2*Math.sqrt(time)))-(interest*xert*nD2)+(dividend*price*nD2*eqt))/365;
 }
 
 
@@ -90,7 +91,7 @@ function OPTIONTHETA(price, strike, volatility, interest, dividend, days, option
 function OPTIONVEGA(price, strike, volatility, interest, dividend, days) {
   var d1 = D1_(price, strike, volatility, interest, dividend, days);
   var time = days/365;
-  var eqt = Math.exp(-dividend * time);
+  var eqt = Math.exp(-interest * time);
   
   return Math.exp(-1*Math.pow(d1,2)/2)/Math.sqrt(2*Math.PI)*eqt*price*Math.sqrt(time)/100;
 }
